@@ -42,9 +42,9 @@ ENV CARGO_TARGET_DIR=/cargo-target
 
 COPY wreq-ffi ./wreq-ffi
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=/cargo-target,id=cargo-target-${TARGETARCH},sharing=locked \
+RUN --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/usr/local/cargo/registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/usr/local/cargo/git,target=/usr/local/cargo/git \
+    --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/cargo-target,target=/cargo-target \
     set -eux; \
     RUST_TARGET=$(cat /tmp/rust_target); \
     case "${TARGETARCH}" in \
@@ -87,8 +87,8 @@ RUN apt-get update -o Acquire::Retries=5 \
 
 WORKDIR /src
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/go/pkg/mod,target=/go/pkg/mod \
+    --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/root/.cache/go-build,target=/root/.cache/go-build \
     go mod download
 
 COPY cmd ./cmd
@@ -98,8 +98,8 @@ COPY --from=frontend-builder /frontend/out /src/static/admin
 COPY --from=rust-builder /out/libwreq_ffi.a /src/wreq-ffi/target/release/libwreq_ffi.a
 COPY --from=rust-builder /out/wreq_ffi.h    /src/wreq-ffi/include/wreq_ffi.h
 
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/go/pkg/mod,target=/go/pkg/mod \
+    --mount=type=cache,id=s/5d7d7b00-99a6-4aca-962c-0b7361c7a5f7-/root/.cache/go-build,target=/root/.cache/go-build \
     set -eux; \
     case "${TARGETARCH}" in \
       amd64) CC=x86_64-linux-gnu-gcc; CXX=x86_64-linux-gnu-g++ ;; \
